@@ -38,14 +38,21 @@ By completing this tutorial, you will learn to:
 git clone https://github.com/athifer/pdx_analysis_tutorial.git
 cd pdx_analysis_tutorial
 
-# Install Python dependencies
-pip install -r requirements.txt
+# 🚨 IMPORTANT: Use enhanced setup to avoid dependency conflicts
+bash setup_enhanced.sh
+
+# Alternative: Manual setup with virtual environment
+python3 -m venv pdx_env
+source pdx_env/bin/activate
+pip install pandas numpy matplotlib seaborn scipy scikit-learn jupyter
 
 # Install R dependencies (run in R console)
 # install.packages(c("lme4", "ggplot2", "pheatmap", "BiocManager"))
 # BiocManager::install("DESeq2")
 # devtools::install_github('SCBIT-YYLab/DRAP')
 ```
+
+**⚠️ Troubleshooting**: If you get dependency conflicts or Jupyter errors, see [Troubleshooting](#-troubleshooting) section below.
 
 ### Step 2: Data Exploration (10 minutes)
 ```python
@@ -114,6 +121,65 @@ jupyter notebook notebooks/03_integrated_analysis.ipynb
 
 **Issue**: Plots not displaying correctly
 **Solution**: Check graphics device settings and ensure proper package installation
+
+## 🚨 Troubleshooting
+
+### Common Environment Issues
+
+**Problem**: Dependency conflicts with existing packages
+```
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed...
+```
+**Solution**: Use a virtual environment or conda:
+```bash
+# Option 1: Virtual environment
+python3 -m venv pdx_env
+source pdx_env/bin/activate
+pip install pandas numpy matplotlib seaborn scipy scikit-learn jupyter
+
+# Option 2: Conda environment
+conda create -n pdx_analysis python=3.9
+conda activate pdx_analysis
+conda install pandas numpy matplotlib seaborn scipy scikit-learn jupyter -c conda-forge
+```
+
+**Problem**: Jupyter "bad interpreter" error
+```
+-bash: /usr/local/bin/jupyter: /usr/local/opt/python/bin/python3.7: bad interpreter: No such file or directory
+```
+**Solution**: Reinstall Jupyter or use Python module:
+```bash
+# Option 1: Reinstall Jupyter
+pip3 install --force-reinstall jupyter
+
+# Option 2: Use Python module
+python3 -m jupyter notebook
+
+# Option 3: Check and fix Python path
+which python3
+pip3 install jupyter
+```
+
+**Problem**: Missing packages after installation
+**Solution**: Verify environment activation:
+```bash
+# Check if virtual environment is activated
+which python
+python --version
+
+# Activate environment if needed
+source pdx_env/bin/activate  # or conda activate pdx_analysis
+```
+
+**Problem**: Permission errors during installation
+**Solution**: Use user installation or virtual environment:
+```bash
+# User installation
+pip install --user package_name
+
+# Or use virtual environment (recommended)
+python3 -m venv pdx_env && source pdx_env/bin/activate
+```
 
 ### Getting Help
 - Check the [documentation](docs/) for detailed explanations
