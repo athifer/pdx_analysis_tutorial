@@ -1,0 +1,49 @@
+# Docker Compose for PDX Analysis Tutorial
+version: '3.8'
+
+services:
+  pdx-analysis:
+    build: .
+    container_name: pdx_analysis_tutorial
+    ports:
+      - "8888:8888"  # Jupyter Lab
+      - "8787:8787"  # RStudio Server (if needed)
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+      - ./logs:/app/logs
+      - ./notebooks:/app/notebooks
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=pdx_analysis_token
+    command: >
+      bash -c "
+        conda run -n pdx_analysis jupyter lab 
+        --ip=0.0.0.0 
+        --port=8888 
+        --no-browser 
+        --allow-root
+        --NotebookApp.token='pdx_analysis_token'
+        --NotebookApp.notebook_dir='/app'
+      "
+    
+  # Optional: RStudio Server for R analysis
+  rstudio:
+    image: rocker/rstudio:4.3
+    container_name: pdx_rstudio
+    ports:
+      - "8787:8787"
+    volumes:
+      - ./:/home/rstudio/pdx_analysis
+      - ./data:/home/rstudio/pdx_analysis/data
+      - ./results:/home/rstudio/pdx_analysis/results
+    environment:
+      - USER=rstudio
+      - PASSWORD=pdx_analysis
+      - ROOT=TRUE
+    profiles:
+      - rstudio  # Use with: docker-compose --profile rstudio up
+
+networks:
+  default:
+    name: pdx_analysis_network

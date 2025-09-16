@@ -1,0 +1,9 @@
+Age,Sex,Cancer_Type,Stage,Prior_Treatment,Treatment_Arm,Model,Passage,Engraftment_Rate,RNA_Batch,Experiment_Date
+70,M,BRCA,II,Pretreated,control,PDX1,3,0.9378672377867462,3,2024-01-07
+63,F,NSCLC,IV,Pretreated,control,PDX2,5,0.8543665677218282,2,2024-01-14
+72,F,CRC,IV,Pretreated,treatment,PDX3,3,0.7521525684410789,2,2024-01-21
+83,M,NSCLC,II,Naive,treatment,PDX4,4,0.8783454361156092,1,2024-01-28
+62,M,NSCLC,IV,Pretreated,control,PDX5,5,0.543692782002168,3,2024-02-04
+62,M,BRCA,II,Pretreated,treatment,PDX6,4,0.9379656400729889,3,2024-02-11
+83,M,BRCA,II,Naive,control,PDX7,5,0.7658397567024907,3,2024-02-18
+74,M,CRC,IV,Pretreated,treatment,PDX8,3,0.8546479956334446,1,2024-02-25
