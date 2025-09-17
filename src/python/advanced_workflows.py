@@ -460,15 +460,37 @@ class PDXWorkflows:
                 }
         
         # Prepare expression data matrix
-        expr_models = [col for col in self.expression_data.columns if col != 'Gene']
-        common_models = list(set(expr_models) & set(response_metrics.keys()))
+        # Handle different possible gene column names
+        gene_col = None
+        if 'Gene' in self.expression_data.columns:
+            gene_col = 'Gene'
+        elif 'Unnamed: 0' in self.expression_data.columns:
+            gene_col = 'Unnamed: 0'
+        else:
+            # Use index if no clear gene column
+            self.expression_data = self.expression_data.set_index(self.expression_data.columns[0])
+            gene_col = None
         
-        if len(common_models) < 3:
-            print("Insufficient overlapping models for analysis")
-            return
-        
-        # Create expression matrix
-        expr_matrix = self.expression_data.set_index('Gene')[common_models]
+        if gene_col:
+            expr_models = [col for col in self.expression_data.columns if col != gene_col]
+            common_models = list(set(expr_models) & set(response_metrics.keys()))
+            
+            if len(common_models) < 3:
+                print("Insufficient overlapping models for analysis")
+                return
+            
+            # Create expression matrix
+            expr_matrix = self.expression_data.set_index(gene_col)[common_models]
+        else:
+            expr_models = [col for col in self.expression_data.columns]
+            common_models = list(set(expr_models) & set(response_metrics.keys()))
+            
+            if len(common_models) < 3:
+                print("Insufficient overlapping models for analysis")
+                return
+            
+            # Use existing index
+            expr_matrix = self.expression_data[common_models]
         
         # Calculate correlations with response
         correlations = []
@@ -641,6 +663,19 @@ class PDXWorkflows:
         variant_data_extended = self.variant_data.copy()
         variant_data_extended['Chromosome'] = np.random.choice(
             list(chromosomes.keys()), len(variant_data_extended)
+        )
+        
+        # Create variant types based on Ref/Alt columns
+        def determine_variant_type(ref, alt):
+            if len(ref) == 1 and len(alt) == 1:
+                return 'SNV'  # Single nucleotide variant
+            elif len(ref) != len(alt):
+                return 'INDEL'  # Insertion or deletion
+            else:
+                return 'MNV'  # Multi-nucleotide variant
+        
+        variant_data_extended['Type'] = variant_data_extended.apply(
+            lambda row: determine_variant_type(row['Ref'], row['Alt']), axis=1
         )
         
         # Assign positions within chromosomes
