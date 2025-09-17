@@ -410,8 +410,8 @@ class EnhancedPDXDataGenerator:
 def main():
     """Generate enhanced PDX datasets"""
     
-    # Create generator
-    generator = EnhancedPDXDataGenerator(n_models=8, n_genes=500, n_timepoints=8)
+    # Create generator with 20 models (10+10 design) and 1000 genes
+    generator = EnhancedPDXDataGenerator(n_models=20, n_genes=1000, n_timepoints=10)
     
     # Generate all data
     metadata, tumor_data, expression_data, variant_data = generator.generate_all_data()
