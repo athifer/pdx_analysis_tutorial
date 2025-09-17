@@ -80,10 +80,12 @@ This tutorial includes comprehensive workflows for:
 - Treatment arm molecular signatures
 
 ### 🌋 **Volcano Plots**
-- Differential gene expression visualization
-- Fold change vs statistical significance mapping
-- Automatic gene classification (up/down/not significant)
+- Differential gene expression visualization with **FDR correction**
+- Fold change vs statistical significance mapping (q-values)
+- **Benjamini-Hochberg multiple testing correction**
+- Raw p-value vs FDR-corrected significance comparison
 - Top differentially expressed gene annotation
+- Publication-ready statistical methodology
 
 ### 🧬 **Circos Plots**
 - Genome-wide variant visualization
@@ -282,9 +284,11 @@ This tutorial generates the following publication-ready visualizations:
 
 ### Volcano Plots
 - **Differential expression**: Treatment vs control gene expression comparison
-- **Statistical significance**: P-value thresholds with multiple testing awareness
+- **Multiple testing correction**: Benjamini-Hochberg FDR correction implemented
+- **Statistical rigor**: Q-values (FDR) vs raw p-values comparison
 - **Effect size visualization**: Log2 fold change thresholds for biological significance
-- **Gene annotation**: Top differentially expressed genes labeled for follow-up
+- **Publication standards**: Follows genomics best practices for significance testing
+- **Gene annotation**: Top FDR-significant genes labeled for follow-up
 
 ### Circos Plots
 - **Genome-wide variants**: Chromosomal distribution visualization

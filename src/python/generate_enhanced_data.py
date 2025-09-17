@@ -125,19 +125,42 @@ class EnhancedPDXDataGenerator:
         return pd.DataFrame(tumor_data)
     
     def generate_expression_data(self, metadata):
-        """Generate realistic gene expression data with biological structure"""
+        """Generate realistic gene expression data with proper differential expression statistics"""
         
         models = metadata['Model'].tolist()
         genes = [f'GENE{i+1}' for i in range(self.n_genes)]
         
-        # Create gene categories with different expression patterns
-        n_de_genes = 200  # More differentially expressed genes
-        oncogenes = genes[:50]  # First 50 genes are oncogenes
-        tumor_suppressors = genes[50:100]  # Next 50 are tumor suppressors
-        immune_genes = genes[100:150]  # Immune response genes
-        drug_targets = genes[150:200]  # Drug target pathway genes
-        housekeeping_genes = genes[200:250]  # Stable housekeeping genes
-        random_genes = genes[250:]  # Remaining genes
+        # Realistic differential expression statistics for 20k genes
+        # Target: ~10% DE genes (2000), 60% up / 40% down
+        n_de_genes = int(0.10 * self.n_genes)  # 2000 DE genes
+        n_upregulated = int(0.60 * n_de_genes)  # 1200 upregulated
+        n_downregulated = n_de_genes - n_upregulated  # 800 downregulated
+        
+        print(f"Generating realistic expression profiles:")
+        print(f"  Total genes: {self.n_genes:,}")
+        print(f"  Target DE genes: {n_de_genes:,} ({n_de_genes/self.n_genes*100:.1f}%)")
+        print(f"  Upregulated: {n_upregulated:,}")
+        print(f"  Downregulated: {n_downregulated:,}")
+        
+        # Define gene categories based on known cancer biology
+        oncogenes = genes[:300]  # First 300 genes are oncogenes
+        tumor_suppressors = genes[300:600]  # Next 300 are tumor suppressors  
+        immune_genes = genes[600:1000]  # Immune response genes
+        drug_targets = genes[1000:1400]  # Drug target pathway genes
+        housekeeping_genes = genes[1400:1600]  # Stable housekeeping genes
+        metabolic_genes = genes[1600:2000]  # Metabolic pathway genes
+        random_genes = genes[2000:]  # Remaining genes (most will be non-DE)
+        
+        # Assign which genes will be differentially expressed
+        # Focus DE genes in biologically relevant categories
+        de_gene_candidates = (oncogenes + tumor_suppressors + immune_genes + 
+                             drug_targets + metabolic_genes + random_genes[:500])
+        
+        # Randomly select DE genes from candidates
+        np.random.shuffle(de_gene_candidates)
+        upregulated_genes = set(de_gene_candidates[:n_upregulated])
+        downregulated_genes = set(de_gene_candidates[n_upregulated:n_upregulated + n_downregulated])
+        de_genes = upregulated_genes | downregulated_genes
         
         expression_matrix = np.zeros((self.n_genes, len(models)))
         
@@ -145,70 +168,66 @@ class EnhancedPDXDataGenerator:
             model_info = metadata[metadata['Model'] == model].iloc[0]
             cancer_type = model_info['Cancer_Type']
             treatment = model_info['Treatment_Arm']
-            rna_batch = model_info['RNA_Batch']
             
             # Base expression levels (tissue-specific)
-            cancer_base = {
-                'NSCLC': np.random.lognormal(2.0, 1.5, self.n_genes),
-                'BRCA': np.random.lognormal(2.2, 1.4, self.n_genes),
-                'CRC': np.random.lognormal(1.8, 1.6, self.n_genes),
-                'PDAC': np.random.lognormal(1.9, 1.7, self.n_genes)
-            }
+            # Use realistic TPM distribution: most genes low, some high
+            if cancer_type == 'NSCLC':
+                base_expr = np.random.lognormal(1.5, 2.0, self.n_genes)
+            elif cancer_type == 'BRCA':
+                base_expr = np.random.lognormal(1.7, 1.8, self.n_genes)
+            elif cancer_type == 'CRC':
+                base_expr = np.random.lognormal(1.3, 2.1, self.n_genes)
+            else:  # PDAC
+                base_expr = np.random.lognormal(1.4, 1.9, self.n_genes)
             
-            base_expr = cancer_base[cancer_type]
-            
-            # Gene category effects
+            # Apply treatment effects for realistic differential expression
             gene_effects = np.ones(self.n_genes)
             
-            # Oncogenes: higher in aggressive cancers
-            oncogene_indices = [genes.index(g) for g in oncogenes]
-            if cancer_type in ['PDAC', 'CRC']:
-                gene_effects[oncogene_indices] *= 1.5
-            
-            # Tumor suppressors: lower in aggressive cancers
-            ts_indices = [genes.index(g) for g in tumor_suppressors]
-            if cancer_type in ['PDAC', 'CRC']:
-                gene_effects[ts_indices] *= 0.7
-            
-            # Treatment effects on specific gene sets
             if treatment == 'treatment':
-                # Strong treatment effects for better differential expression
-                # Treatment downregulates oncogenes significantly
-                gene_effects[oncogene_indices] *= np.random.normal(0.4, 0.1, len(oncogene_indices))  # Stronger effect
-                
-                # Treatment upregulates tumor suppressors
-                gene_effects[ts_indices] *= np.random.normal(1.8, 0.2, len(ts_indices))  # Stronger effect
-                
-                # Drug target pathway strongly affected
-                drug_target_indices = [genes.index(g) for g in drug_targets]
-                gene_effects[drug_target_indices] *= np.random.normal(0.3, 0.15, len(drug_target_indices))
-                
-                # Immune response varies by cancer type
-                immune_indices = [genes.index(g) for g in immune_genes]
-                if cancer_type == 'NSCLC':  # More immunogenic
-                    gene_effects[immune_indices] *= np.random.normal(2.0, 0.3, len(immune_indices))
-                elif cancer_type == 'BRCA':
-                    gene_effects[immune_indices] *= np.random.normal(1.5, 0.2, len(immune_indices))
-                else:
-                    gene_effects[immune_indices] *= np.random.normal(1.2, 0.15, len(immune_indices))
+                # Apply fold changes to DE genes
+                for j, gene in enumerate(genes):
+                    if gene in upregulated_genes:
+                        # Realistic upregulation: mostly 1.5-4x, some extreme
+                        if np.random.random() < 0.1:  # 10% extreme
+                            fold_change = np.random.uniform(4, 10)
+                        else:
+                            fold_change = np.random.uniform(1.5, 4)
+                        gene_effects[j] = fold_change
+                        
+                    elif gene in downregulated_genes:
+                        # Realistic downregulation: mostly 0.25-0.67x, some extreme
+                        if np.random.random() < 0.1:  # 10% extreme
+                            fold_change = np.random.uniform(0.1, 0.25)
+                        else:
+                            fold_change = np.random.uniform(0.25, 0.67)
+                        gene_effects[j] = fold_change
+                    
+                    else:
+                        # Non-DE genes: small random variation
+                        gene_effects[j] = np.random.normal(1.0, 0.1)
+                        gene_effects[j] = max(0.8, min(1.2, gene_effects[j]))  # Cap at ±20%
             
-            # Housekeeping genes remain stable
+            else:  # Control group
+                # Control samples have small random variation only
+                gene_effects = np.random.normal(1.0, 0.05, self.n_genes)
+                gene_effects = np.clip(gene_effects, 0.9, 1.1)  # ±10% variation
+            
+            # Housekeeping genes are always stable
             hk_indices = [genes.index(g) for g in housekeeping_genes]
-            gene_effects[hk_indices] = np.random.normal(1.0, 0.05, len(hk_indices))
+            gene_effects[hk_indices] = np.random.normal(1.0, 0.02, len(hk_indices))
             
-            # Batch effects (technical variation)
-            batch_effects = {1: 1.0, 2: 1.1, 3: 0.95}
-            batch_multiplier = batch_effects[rna_batch]
+            # Add batch effects (minimal technical variation)
+            batch_multiplier = np.random.normal(1.0, 0.05)
             
             # Final expression values
             expression_values = base_expr * gene_effects * batch_multiplier
             
-            # Add noise
-            noise = np.random.lognormal(0, 0.3, self.n_genes)
+            # Add realistic biological noise
+            noise = np.random.lognormal(0, 0.1, self.n_genes)
             expression_values *= noise
             
-            # Ensure reasonable TPM range (0.1 - 10000)
-            expression_values = np.clip(expression_values, 0.1, 10000)
+            # Ensure realistic TPM range (0.1 - 50,000 TPM)
+            expression_values = np.clip(expression_values, 0.1, 50000)
             
             expression_matrix[:, i] = expression_values
         
@@ -410,8 +429,8 @@ class EnhancedPDXDataGenerator:
 def main():
     """Generate enhanced PDX datasets"""
     
-    # Create generator with 20 models (10+10 design) and 1000 genes
-    generator = EnhancedPDXDataGenerator(n_models=20, n_genes=1000, n_timepoints=10)
+    # Create generator with 20 models (10+10 design) and 20,000 genes for realistic scale
+    generator = EnhancedPDXDataGenerator(n_models=20, n_genes=20000, n_timepoints=10)
     
     # Generate all data
     metadata, tumor_data, expression_data, variant_data = generator.generate_all_data()

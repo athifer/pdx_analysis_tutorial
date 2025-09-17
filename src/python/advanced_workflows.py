@@ -18,6 +18,38 @@ warnings.filterwarnings('ignore')
 plt.style.use('default')
 sns.set_palette("husl")
 
+def benjamini_hochberg_correction(p_values, alpha=0.05):
+    """
+    Apply Benjamini-Hochberg correction for multiple testing
+    Returns adjusted p-values (q-values) and significance boolean array
+    """
+    p_values = np.array(p_values)
+    n = len(p_values)
+    
+    # Sort p-values and keep track of original indices
+    sorted_indices = np.argsort(p_values)
+    sorted_pvals = p_values[sorted_indices]
+    
+    # Calculate adjusted p-values (q-values)
+    q_values = np.zeros(n)
+    
+    for i in range(n-1, -1, -1):  # Start from largest p-value
+        if i == n-1:
+            q_values[sorted_indices[i]] = sorted_pvals[i]
+        else:
+            # BH correction: q = min(p * n / (i+1), q_next)
+            q_val = min(sorted_pvals[i] * n / (i + 1), 
+                       q_values[sorted_indices[i+1]])
+            q_values[sorted_indices[i]] = q_val
+    
+    # Ensure q-values don't exceed 1
+    q_values = np.minimum(q_values, 1.0)
+    
+    # Determine significance
+    significant = q_values < alpha
+    
+    return q_values, significant
+
 class PDXWorkflows:
     """Advanced PDX analysis workflows and visualizations"""
     
@@ -826,17 +858,24 @@ class PDXWorkflows:
             return
         
         # Load metadata to get treatment assignments
-        metadata_path = f'{self.data_dir}/metadata_mock.csv'
+        metadata_path = f'{self.data_dir}/metadata_effective.csv'
         try:
             metadata = pd.read_csv(metadata_path)
         except:
-            print("Warning: Could not load metadata. Using simulated treatment assignments.")
-            # Create simulated metadata
-            models = [col for col in self.expression_data.columns if col.startswith('PDX')]
-            metadata = pd.DataFrame({
-                'Model': models,
-                'Treatment_Arm': ['control'] * 10 + ['treatment'] * 10
-            })
+            # Try alternative metadata files
+            try:
+                metadata_path = f'{self.data_dir}/metadata_mock.csv'
+                metadata = pd.read_csv(metadata_path)
+            except:
+                print("Warning: Could not load metadata. Using simulated treatment assignments.")
+                # Create simulated metadata based on actual model names
+                models = [col for col in self.expression_data.columns if col.startswith('PDX')]
+                n_models = len(models)
+                n_control = n_models // 2
+                metadata = pd.DataFrame({
+                    'Model': models,
+                    'Treatment_Arm': ['control'] * n_control + ['treatment'] * (n_models - n_control)
+                })
         
         # Get gene column name
         gene_col = None
@@ -881,13 +920,9 @@ class PDXWorkflows:
             control_mean = np.mean(control_expr)
             treatment_mean = np.mean(treatment_expr)
             
-            # Calculate fold change (treatment/control)
-            if control_mean > 0:
-                fold_change = treatment_mean / control_mean
-            else:
-                fold_change = treatment_mean / 0.001  # Avoid division by zero
-            
-            log2_fc = np.log2(fold_change) if fold_change > 0 else -10
+            # Calculate log2 fold change (data is already in log2 space)
+            # For log2-transformed data: log2FC = treatment_mean - control_mean
+            log2_fc = treatment_mean - control_mean
             
             # Statistical test (t-test)
             try:
@@ -908,20 +943,28 @@ class PDXWorkflows:
             'MinusLog10PValue': [-np.log10(p) for p in p_values]
         })
         
+        # Apply multiple testing correction (Benjamini-Hochberg)
+        q_values, fdr_significant = benjamini_hochberg_correction(volcano_data['PValue'].values, alpha=0.05)
+        volcano_data['QValue'] = q_values
+        volcano_data['MinusLog10QValue'] = [-np.log10(q) for q in q_values]
+        volcano_data['FDR_Significant'] = fdr_significant
+        
         # Define significance thresholds
         fc_threshold = 1.0  # |log2FC| > 1
-        p_threshold = 0.05  # p < 0.05
+        p_threshold = 0.05  # raw p < 0.05
+        fdr_threshold = 0.05  # FDR < 0.05
         
-        # Classify genes
+        # Classify genes using FDR-corrected significance
         volcano_data['Significant'] = (
             (np.abs(volcano_data['Log2FoldChange']) > fc_threshold) & 
-            (volcano_data['PValue'] < p_threshold)
+            volcano_data['FDR_Significant']
         )
         volcano_data['Direction'] = np.where(
             volcano_data['Log2FoldChange'] > fc_threshold, 'Upregulated',
             np.where(volcano_data['Log2FoldChange'] < -fc_threshold, 'Downregulated', 'Not Significant')
         )
-        volcano_data.loc[volcano_data['PValue'] >= p_threshold, 'Direction'] = 'Not Significant'
+        # Use FDR significance instead of raw p-value
+        volcano_data.loc[~volcano_data['FDR_Significant'], 'Direction'] = 'Not Significant'
         
         # Create volcano plot
         fig, ax = plt.subplots(figsize=(12, 10))
@@ -933,31 +976,31 @@ class PDXWorkflows:
             'Not Significant': '#7f7f7f'  # Gray
         }
         
-        # Plot points by category
+        # Plot points by category - use FDR-corrected q-values for y-axis
         for direction in ['Not Significant', 'Upregulated', 'Downregulated']:
             data_subset = volcano_data[volcano_data['Direction'] == direction]
-            ax.scatter(data_subset['Log2FoldChange'], data_subset['MinusLog10PValue'],
+            ax.scatter(data_subset['Log2FoldChange'], data_subset['MinusLog10QValue'],
                       c=colors[direction], alpha=0.6, s=30, label=direction)
         
         # Add significance thresholds
-        ax.axhline(-np.log10(p_threshold), color='black', linestyle='--', alpha=0.5, 
-                  label=f'p = {p_threshold}')
+        ax.axhline(-np.log10(fdr_threshold), color='black', linestyle='--', alpha=0.5, 
+                  label=f'FDR = {fdr_threshold}')
         ax.axvline(fc_threshold, color='black', linestyle='--', alpha=0.5)
         ax.axvline(-fc_threshold, color='black', linestyle='--', alpha=0.5)
         
-        # Label most significant genes
-        top_genes = volcano_data.nlargest(10, 'MinusLog10PValue')
+        # Label most significant genes (by FDR)
+        top_genes = volcano_data.nlargest(10, 'MinusLog10QValue')
         for _, gene_data in top_genes.iterrows():
             if gene_data['Significant']:
                 ax.annotate(gene_data['Gene'], 
-                           xy=(gene_data['Log2FoldChange'], gene_data['MinusLog10PValue']),
+                           xy=(gene_data['Log2FoldChange'], gene_data['MinusLog10QValue']),
                            xytext=(5, 5), textcoords='offset points',
                            fontsize=8, alpha=0.8)
         
         # Formatting
         ax.set_xlabel('Log₂ Fold Change (Treatment/Control)', fontsize=12, fontweight='bold')
-        ax.set_ylabel('-Log₁₀ P-Value', fontsize=12, fontweight='bold')
-        ax.set_title('Volcano Plot: Differential Gene Expression\nTreatment vs Control', 
+        ax.set_ylabel('-Log₁₀ Q-Value (FDR-corrected)', fontsize=12, fontweight='bold')
+        ax.set_title('Volcano Plot: Differential Gene Expression\nTreatment vs Control (FDR-corrected)', 
                      fontsize=14, fontweight='bold', pad=20)
         
         # Add grid
@@ -970,11 +1013,15 @@ class PDXWorkflows:
         n_up = len(volcano_data[volcano_data['Direction'] == 'Upregulated'])
         n_down = len(volcano_data[volcano_data['Direction'] == 'Downregulated']) 
         n_total = len(volcano_data)
+        n_raw_sig = len(volcano_data[volcano_data['PValue'] < p_threshold])
+        n_fdr_sig = len(volcano_data[volcano_data['FDR_Significant']])
         
         stats_text = f"Total genes: {n_total}\n"
         stats_text += f"Upregulated: {n_up} ({n_up/n_total*100:.1f}%)\n"
         stats_text += f"Downregulated: {n_down} ({n_down/n_total*100:.1f}%)\n"
-        stats_text += f"Thresholds: |log₂FC| > {fc_threshold}, p < {p_threshold}"
+        stats_text += f"Raw p<0.05: {n_raw_sig}\n"
+        stats_text += f"FDR<0.05: {n_fdr_sig}\n"
+        stats_text += f"Thresholds: |log₂FC| > {fc_threshold}, FDR < {fdr_threshold}"
         
         ax.text(0.02, 0.98, stats_text, transform=ax.transAxes, 
                fontsize=10, va='top', ha='left',
@@ -990,11 +1037,14 @@ class PDXWorkflows:
         plt.show()
         
         # Print summary
-        print(f"\nDifferential Expression Summary:")
+        print(f"\nDifferential Expression Summary (FDR-corrected):")
         print(f"  Upregulated genes: {n_up}")
         print(f"  Downregulated genes: {n_down}") 
         print(f"  Not significant: {n_total - n_up - n_down}")
         print(f"  Total genes analyzed: {n_total}")
+        print(f"  Raw p<0.05: {n_raw_sig} ({n_raw_sig/n_total*100:.1f}%)")
+        print(f"  FDR<0.05: {n_fdr_sig} ({n_fdr_sig/n_total*100:.1f}%)")
+        print(f"  Multiple testing correction: Benjamini-Hochberg (FDR)")
         
         return volcano_data
     
