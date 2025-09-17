@@ -149,8 +149,8 @@ class TestDataGeneration(unittest.TestCase):
         volumes = model_data['Volume_mm3'].values
         self.assertTrue(all(volumes[i] <= volumes[i+1] for i in range(len(volumes)-1)))
 
-class TestReporting(unittest.TestCase):
-    """Test reporting functions"""
+class TestAdvancedWorkflows(unittest.TestCase):
+    """Test advanced workflows functions"""
     
     def test_tgi_calculation(self):
         """Test TGI calculation"""
@@ -186,7 +186,7 @@ def run_tests():
     suite.addTests(loader.loadTestsFromTestCase(TestPDXDataProcessor))
     suite.addTests(loader.loadTestsFromTestCase(TestStatisticalFunctions))
     suite.addTests(loader.loadTestsFromTestCase(TestDataGeneration))
-    suite.addTests(loader.loadTestsFromTestCase(TestReporting))
+    suite.addTests(loader.loadTestsFromTestCase(TestAdvancedWorkflows))
     
     # Run tests
     runner = unittest.TextTestRunner(verbosity=2)

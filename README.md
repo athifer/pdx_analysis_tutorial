@@ -17,8 +17,8 @@ conda activate pdx_analysis
 pip install lifelines
 # Note: You may see a deprecation warning about 'autograd-gamma' - this is normal and safe to ignore
 
-# 4. Generate enhanced dataset (20 models: 10+10 design)
-python src/python/generate_enhanced_data.py
+# 4. Generate effective PDX dataset (15+15 design)
+python src/python/generate_effective_pdx_data.py
 
 # 5. Run all advanced workflows
 python src/python/advanced_workflows.py
@@ -247,16 +247,9 @@ w.circos_plot()
 ### Step 5: Individual Workflow Components
 
 #### Basic Analysis
-```bash
-# Data preprocessing
-python scripts/preprocessing.py
-
-# Variant analysis
-python src/python/variant_analysis.py
-```
-
 #### Advanced Workflows
 ```bash
+# All analysis is now integrated in the main workflow
 # Individual components as needed
 # Growth curves only
 python -c "
@@ -335,23 +328,15 @@ pdx_analysis_tutorial/
 │   ├── python/
 │   │   ├── advanced_workflows.py           # 🆕 Complete visualization suite with FDR correction
 │   │   ├── generate_effective_pdx_data.py  # Realistic PDX study data generation
-│   │   ├── simulate_pdx_scenarios.py       # Study design simulation tools
-│   │   ├── variant_analysis.py             # Variant-response analysis
-│   │   ├── preprocessing.py                # Data preprocessing utilities
-│   │   └── plotting.py                     # Plotting utilities
+│   │   └── advanced_workflows.py           # Complete analysis pipeline
 │   └── R/
 │       └── analyze_volume.R                 # R-based growth analysis
 ├── 📁 notebooks/               # Jupyter notebooks for interactive analysis
 │   ├── 01_data_exploration.ipynb           # Data overview and QC
 │   ├── 02_biomarker_analysis.ipynb         # Expression analysis
 │   └── 03_integrated_analysis.ipynb        # Multi-omics integration
-├── 📁 scripts/                 # Standalone analysis scripts
-│   └── preprocessing.py                # Data preprocessing
 ├── 📁 results/                 # Output directory for plots and results
 ├── 📁 tests/                   # Unit tests for analysis functions
-├── 📄 VOLCANO_PLOT_SUMMARY.md         # 🆕 Volcano plot implementation guide
-├── 📄 MULTIPLE_TESTING_CORRECTION_EXPLANATION.md  # 🆕 FDR correction methodology
-├── 📄 PDX_STUDY_EFFECTIVENESS_ANALYSIS.md         # 🆕 Study design best practices
 ├── environment.yml             # Conda environment specification
 ├── requirements.txt            # Python package requirements
 └── setup.sh                   # Environment setup script

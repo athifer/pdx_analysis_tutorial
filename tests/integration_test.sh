@@ -49,14 +49,10 @@ fi
 log_and_print "\nTest 2: Checking key files..."
 key_files=(
     "src/R/analyze_volume.R"
-    "src/python/preprocessing.py"
-    "src/python/generate_enhanced_data.py"
-    "src/python/plotting.py"
-    "src/python/reporting.py"
+    "src/python/generate_effective_pdx_data.py"
+    "src/python/advanced_workflows.py"
     "notebooks/02_biomarker_analysis.ipynb"
     "config/config.ini"
-    "workflows/run_complete_analysis.R"
-    "workflows/run_complete_analysis.py"
 )
 
 missing_files=()
@@ -168,9 +164,9 @@ fi
 # Test 8: Test data generation (if Python available)
 log_and_print "\nTest 8: Testing data generation..."
 if command -v python3 >/dev/null 2>&1; then
-    if [ -f "src/python/generate_enhanced_data.py" ]; then
+    if [ -f "src/python/generate_effective_pdx_data.py" ]; then
         # Test basic imports (won't run full script due to dependencies)
-        if python3 -c "import sys; sys.path.append('src/python'); from generate_enhanced_data import EnhancedPDXDataGenerator" 2>/dev/null; then
+        if python3 -c "import sys; sys.path.append('src/python'); import generate_effective_pdx_data" 2>/dev/null; then
             log_and_print "✓ Data generation module imports successfully"
         else
             log_and_print "⚠ Data generation module import failed (may need packages)"

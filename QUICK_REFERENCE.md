@@ -71,12 +71,10 @@ w.volcano_plot()
 ### Analysis Scripts  
 - `src/python/advanced_workflows.py` - Main analysis suite with volcano plots
 - `src/python/generate_effective_pdx_data.py` - Generate realistic study data
-- `src/python/simulate_pdx_scenarios.py` - Study design comparison tools
 
 ### Documentation
-- `VOLCANO_PLOT_SUMMARY.md` - Volcano plot implementation details
-- `MULTIPLE_TESTING_CORRECTION_EXPLANATION.md` - FDR correction methodology
-- `PDX_STUDY_EFFECTIVENESS_ANALYSIS.md` - Study design best practices
+- `README.md` - Complete tutorial and setup guide
+- `QUICK_REFERENCE.md` - Quick command reference (this file)
 
 ### Results
 - `results/volcano_plot.png` - Latest volcano plot (300 DPI, publication-ready)

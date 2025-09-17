@@ -144,12 +144,12 @@ setup_r() {
 generate_sample_data() {
     print_status "Generating sample data..."
     
-    if [ -n "$PYTHON_CMD" ] && [ -f "src/python/generate_enhanced_data.py" ]; then
+    if [ -n "$PYTHON_CMD" ] && [ -f "src/python/generate_effective_pdx_data.py" ]; then
         # Try to generate data (may fail if packages not installed)
-        if $PYTHON_CMD src/python/generate_enhanced_data.py --quick >/dev/null 2>&1; then
+        if $PYTHON_CMD src/python/generate_effective_pdx_data.py >/dev/null 2>&1; then
             print_status "Sample data generated successfully"
         else
-            print_warning "Could not generate enhanced data (packages may not be installed yet)"
+            print_warning "Could not generate effective data (packages may not be installed yet)"
             print_status "Creating basic mock data files..."
             
             # Create basic CSV files if they don't exist
@@ -285,8 +285,8 @@ main() {
     echo "4. Start with the tutorial: notebooks/02_biomarker_analysis.ipynb"
     
     if [ "$choice" = "4" ]; then
-        echo "5. Generate enhanced data: python src/python/generate_enhanced_data.py"
-        echo "6. Run complete analysis: python workflows/run_complete_analysis.py"
+        echo "5. Generate effective data: python src/python/generate_effective_pdx_data.py"
+        echo "6. Run complete analysis: python src/python/advanced_workflows.py"
     fi
     
     echo ""
