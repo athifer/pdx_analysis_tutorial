@@ -15,6 +15,7 @@ conda activate pdx_analysis
 
 # 3. Install additional packages for advanced workflows
 pip install lifelines
+# Note: You may see a deprecation warning about 'autograd-gamma' - this is normal and safe to ignore
 
 # 4. Generate enhanced dataset (20 models: 10+10 design)
 python src/python/generate_enhanced_data.py
@@ -408,6 +409,14 @@ pip install -r requirements.txt
 # Option 3: Install individual packages
 pip install pandas numpy matplotlib seaborn scipy scikit-learn lifelines jupyter
 ```
+
+### Expected Warnings During Installation
+
+**Lifelines Package Warning**: When installing `lifelines`, you may see a deprecation warning:
+```
+DEPRECATION: Building 'autograd-gamma' using the legacy setup.py bdist_wheel mechanism...
+```
+**This is normal and safe to ignore.** The warning occurs because a dependency (`autograd-gamma`) uses older packaging standards. The installation will complete successfully and lifelines will work perfectly for survival analysis.
 
 ### Verification Commands
 Test your setup:
