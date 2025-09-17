@@ -48,6 +48,7 @@ conda activate pdx_analysis
 - **Molecular Heatmaps**: Expression-response correlation visualization
 - **Volcano Plots**: Differential gene expression analysis (treatment vs control)
 - **Circos Plots**: Genome-wide variant distribution mapping
+- **Clinical Color Scheme**: Standard colors (control=gray, treatment=blue) with mobile-optimized fonts
 
 ### 🔧 **Streamlined Package**
 - **Reduced Complexity**: Removed Docker and non-essential components
@@ -397,6 +398,21 @@ This tutorial generates the following publication-ready visualizations:
 - **Tumor volume effect**: ~56% growth inhibition (dramatic response)
 - **Consistent responders**: Most models show clear treatment benefit
 - **Use case**: Demonstrating ideal study outcomes and method validation
+
+## 🎨 **Visualization Standards**
+
+### Clinical Color Scheme
+Following established clinical research visualization standards:
+- **Control Group**: Gray (neutral, standard for baseline/control conditions)
+- **Treatment Group**: Blue (distinct, professional color for interventions)
+- **This scheme**: Widely used in clinical trials, PDX studies, and oncology research publications
+
+### Mobile-Optimized Design
+- **Large Fonts**: 16-18pt labels, 14pt axis labels for phone readability
+- **High Contrast**: Clear color differentiation for accessibility
+- **Scalable Layouts**: Multi-panel plots with appropriate spacing
+- **Clean Appearance**: Title-free plots for minimal, professional look
+- **Publication Ready**: Publication-quality plots suitable for presentations and manuscripts
 
 ### Enhanced Study Features
 - **Lower technical noise**: Improved experimental protocols

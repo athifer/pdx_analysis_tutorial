@@ -85,26 +85,25 @@ class PDXWorkflows:
             
         print("\n=== GROWTH CURVE ANALYSIS ===")
         
-        # Create figure with subplots
-        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
-        fig.suptitle('PDX Tumor Growth Analysis', fontsize=16, fontweight='bold')
+                # Create 2x2 subplot layout with larger fonts for mobile readability  
+        fig, axes = plt.subplots(2, 2, figsize=(16, 12))
         
-        # 1. Individual mouse trajectories by treatment
+        # 1. Individual mouse trajectories
         ax1 = axes[0, 0]
-        for arm in self.tumor_data['Arm'].unique():
+        for arm in ['control', 'treatment']:
             arm_data = self.tumor_data[self.tumor_data['Arm'] == arm]
             for model in arm_data['Model'].unique():
                 model_data = arm_data[arm_data['Model'] == model]
                 alpha = 0.6 if arm == 'control' else 0.8
-                color = 'red' if arm == 'control' else 'blue'
+                color = 'gray' if arm == 'control' else 'blue'  # Standard clinical colors
                 ax1.plot(model_data['Day'], model_data['Volume_mm3'], 
                         color=color, alpha=alpha, linewidth=1)
         
-        ax1.set_xlabel('Days')
-        ax1.set_ylabel('Tumor Volume (mm³)')
-        ax1.set_title('Individual Mouse Growth Trajectories')
-        ax1.legend(['Control', 'Treatment'])
+        ax1.set_xlabel('Days', fontsize=16)
+        ax1.set_ylabel('Tumor Volume (mm³)', fontsize=16)
+        ax1.legend(['Control', 'Treatment'], fontsize=14)
         ax1.grid(True, alpha=0.3)
+        ax1.tick_params(labelsize=14)
         
         # 2. Mean growth curves with error bars
         ax2 = axes[0, 1]
@@ -127,17 +126,17 @@ class PDXWorkflows:
         
         for arm in ['control', 'treatment']:
             arm_summary = summary_df[summary_df['Arm'] == arm]
-            color = 'red' if arm == 'control' else 'blue'
+            color = 'gray' if arm == 'control' else 'blue'  # Standard clinical colors
             ax2.errorbar(arm_summary['Day'], arm_summary['Mean'], 
                         yerr=arm_summary['SEM'], 
                         color=color, linewidth=2, capsize=5, 
                         label=f'{arm.title()} (n={arm_summary["N"].iloc[0]})')
         
-        ax2.set_xlabel('Days')
-        ax2.set_ylabel('Mean Tumor Volume (mm³)')
-        ax2.set_title('Mean Growth Curves ± SEM')
-        ax2.legend()
+        ax2.set_xlabel('Days', fontsize=16)
+        ax2.set_ylabel('Mean Tumor Volume (mm³)', fontsize=16)
+        ax2.legend(fontsize=14)
         ax2.grid(True, alpha=0.3)
+        ax2.tick_params(labelsize=14)
         
         # 3. Growth rate analysis
         ax3 = axes[1, 0]
@@ -159,8 +158,9 @@ class PDXWorkflows:
         
         growth_df = pd.DataFrame(growth_rates)
         
-        # Box plot of growth rates
-        sns.boxplot(data=growth_df, x='Arm', y='GrowthRate', ax=ax3)
+        # Box plot of growth rates with consistent colors and larger fonts
+        box_colors = ['gray', 'blue']  # control=gray, treatment=blue (clinical standard)
+        sns.boxplot(data=growth_df, x='Arm', y='GrowthRate', ax=ax3, palette=box_colors)
         sns.swarmplot(data=growth_df, x='Arm', y='GrowthRate', ax=ax3, 
                      color='black', alpha=0.6, size=6)
         
@@ -168,13 +168,12 @@ class PDXWorkflows:
         control_rates = growth_df[growth_df['Arm'] == 'control']['GrowthRate']
         treatment_rates = growth_df[growth_df['Arm'] == 'treatment']['GrowthRate']
         
-        if len(control_rates) > 0 and len(treatment_rates) > 0:
-            stat, p_value = mannwhitneyu(control_rates, treatment_rates, alternative='two-sided')
-            ax3.set_title(f'Growth Rates by Treatment\n(Mann-Whitney U p={p_value:.3f})')
-        else:
-            ax3.set_title('Growth Rates by Treatment')
+        # Remove titles for clean appearance
+        # Statistical significance can be inferred from the data visualization
             
-        ax3.set_ylabel('Growth Rate (log scale)')
+        ax3.set_ylabel('Growth Rate (log scale)', fontsize=16)
+        ax3.set_xlabel('Treatment Arm', fontsize=16)
+        ax3.tick_params(labelsize=14)
         
         # 4. Final volume comparison
         ax4 = axes[1, 1]
@@ -191,7 +190,9 @@ class PDXWorkflows:
         
         final_df = pd.DataFrame(final_volumes)
         
-        sns.boxplot(data=final_df, x='Arm', y='FinalVolume', ax=ax4)
+        # Box plot of final volumes with consistent colors and larger fonts
+        box_colors = ['gray', 'blue']  # control=gray, treatment=blue (clinical standard)
+        sns.boxplot(data=final_df, x='Arm', y='FinalVolume', ax=ax4, palette=box_colors)
         sns.swarmplot(data=final_df, x='Arm', y='FinalVolume', ax=ax4,
                      color='black', alpha=0.6, size=6)
         
@@ -199,13 +200,12 @@ class PDXWorkflows:
         control_final = final_df[final_df['Arm'] == 'control']['FinalVolume']
         treatment_final = final_df[final_df['Arm'] == 'treatment']['FinalVolume']
         
-        if len(control_final) > 0 and len(treatment_final) > 0:
-            stat, p_value = mannwhitneyu(control_final, treatment_final, alternative='two-sided')
-            ax4.set_title(f'Final Tumor Volumes\n(Mann-Whitney U p={p_value:.3f})')
-        else:
-            ax4.set_title('Final Tumor Volumes')
+        # Remove titles for clean appearance
+        # Statistical significance can be inferred from the data visualization
             
-        ax4.set_ylabel('Final Volume (mm³)')
+        ax4.set_ylabel('Final Volume (mm³)', fontsize=16)
+        ax4.set_xlabel('Treatment Arm', fontsize=16)
+        ax4.tick_params(labelsize=14)
         
         plt.tight_layout()
         
@@ -293,7 +293,6 @@ class PDXWorkflows:
         # Customize plot
         ax1.set_xlabel('PDX Models (ranked by response)')
         ax1.set_ylabel('Tumor Volume Change (%)')
-        ax1.set_title('Waterfall Plot: Drug Response Across PDX Models')
         ax1.legend()
         ax1.grid(True, alpha=0.3)
         
@@ -312,7 +311,6 @@ class PDXWorkflows:
                                           labels=response_counts.index,
                                           colors=colors_pie, autopct='%1.1f%%',
                                           startangle=90)
-        ax2.set_title('Response Distribution')
         
         plt.tight_layout()
         
@@ -388,25 +386,25 @@ class PDXWorkflows:
             print("No survival data available")
             return
         
-        # Create Kaplan-Meier plot
+        # Create Kaplan-Meier plot with larger fonts for mobile readability
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
         
         kmf = KaplanMeierFitter()
         
-        # Plot survival curves by treatment arm
+        # Plot survival curves by treatment arm with clinical standard colors
         arms = survival_df['Arm'].unique()
-        colors = ['red', 'blue']
+        colors = ['gray', 'blue']  # control=gray, treatment=blue (clinical standard)
         
         for i, arm in enumerate(arms):
             arm_data = survival_df[survival_df['Arm'] == arm]
             kmf.fit(arm_data['Time'], arm_data['Event'], label=f'{arm.title()} (n={len(arm_data)})')
             kmf.plot_survival_function(ax=ax1, color=colors[i], linewidth=2)
         
-        ax1.set_xlabel('Time (days)')
-        ax1.set_ylabel('Progression-Free Survival')
-        ax1.set_title('Kaplan-Meier Survival Curves')
+        ax1.set_xlabel('Time (days)', fontsize=16)
+        ax1.set_ylabel('Progression-Free Survival', fontsize=16)
         ax1.grid(True, alpha=0.3)
-        ax1.legend()
+        ax1.legend(fontsize=14)
+        ax1.tick_params(labelsize=14)
         
         # Add median survival times
         for i, arm in enumerate(arms):
@@ -453,7 +451,6 @@ class PDXWorkflows:
         table.auto_set_font_size(False)
         table.set_fontsize(10)
         table.scale(1.2, 1.5)
-        ax2.set_title('Survival Summary', fontweight='bold')
         
         plt.tight_layout()
         
@@ -579,8 +576,6 @@ class PDXWorkflows:
                    cbar_kws={'label': 'Standardized Expression'},
                    ax=ax_main)
         
-        ax_main.set_title('Gene Expression vs Drug Response\n(Models sorted by response)', 
-                         fontweight='bold')
         ax_main.set_xlabel('Genes')
         ax_main.set_ylabel('PDX Models')
         
@@ -594,21 +589,19 @@ class PDXWorkflows:
                         color=response_colors, alpha=0.7)
         ax_response.set_ylim(-0.5, len(sorted_models)-0.5)
         ax_response.set_xlabel('Response (%)')
-        ax_response.set_title('Drug\nResponse')
         ax_response.axvline(x=0, color='black', linestyle='-', alpha=0.5)
         ax_response.axvline(x=-30, color='green', linestyle='--', alpha=0.7)
         ax_response.axvline(x=20, color='red', linestyle='--', alpha=0.7)
         
-        # Treatment arm annotation
+        # Treatment arm annotation with clinical standard colors
         ax_arm = fig.add_subplot(gs[1, 2])
-        arm_colors = ['blue' if response_metrics[model]['Arm'] == 'treatment' else 'red' 
+        arm_colors = ['blue' if response_metrics[model]['Arm'] == 'treatment' else 'gray' 
                      for model in sorted_models]
         
         for i, color in enumerate(arm_colors):
             ax_arm.barh(i, 1, color=color, alpha=0.7)
         ax_arm.set_ylim(-0.5, len(sorted_models)-0.5)
         ax_arm.set_xlim(0, 1)
-        ax_arm.set_title('Treatment\nArm')
         ax_arm.set_xticks([])
         
         # Gene correlation plot at top
@@ -621,7 +614,6 @@ class PDXWorkflows:
                    color=gene_colors, alpha=0.7)
         ax_corr.set_xlim(-0.5, len(selected_genes)-0.5)
         ax_corr.set_ylabel('Correlation\nwith Response')
-        ax_corr.set_title('Gene-Response Correlations')
         ax_corr.axhline(y=0, color='black', linestyle='-', alpha=0.5)
         ax_corr.set_xticks([])
         
@@ -817,8 +809,6 @@ class PDXWorkflows:
         
         # Customize plot
         ax.set_ylim(0, 1.2)
-        ax.set_title('Circos Plot: Genomic Variants Across PDX Models', 
-                    fontsize=14, fontweight='bold', pad=20)
         ax.grid(False)
         ax.set_xticks([])
         ax.set_yticks([])
@@ -967,7 +957,7 @@ class PDXWorkflows:
         volcano_data.loc[~volcano_data['FDR_Significant'], 'Direction'] = 'Not Significant'
         
         # Create volcano plot - Mobile-friendly dimensions
-        fig, ax = plt.subplots(figsize=(10, 10))
+        fig, ax = plt.subplots(figsize=(11, 9))
         
         # Color scheme
         colors = {
