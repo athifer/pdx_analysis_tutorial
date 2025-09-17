@@ -813,6 +813,191 @@ class PDXWorkflows:
         
         return variant_data_extended
     
+    def volcano_plot(self, save_plots=True):
+        """
+        Generate volcano plot for differential gene expression analysis
+        Shows fold change vs -log10(p-value) for treatment vs control comparison
+        """
+        print("\n=== VOLCANO PLOT ANALYSIS ===")
+        
+        # Prepare expression data
+        if self.expression_data is None:
+            print("Error: Expression data not loaded")
+            return
+        
+        # Load metadata to get treatment assignments
+        metadata_path = f'{self.data_dir}/metadata_mock.csv'
+        try:
+            metadata = pd.read_csv(metadata_path)
+        except:
+            print("Warning: Could not load metadata. Using simulated treatment assignments.")
+            # Create simulated metadata
+            models = [col for col in self.expression_data.columns if col.startswith('PDX')]
+            metadata = pd.DataFrame({
+                'Model': models,
+                'Treatment_Arm': ['control'] * 10 + ['treatment'] * 10
+            })
+        
+        # Get gene column name
+        gene_col = None
+        if 'Gene' in self.expression_data.columns:
+            gene_col = 'Gene'
+        elif 'Unnamed: 0' in self.expression_data.columns:
+            gene_col = 'Unnamed: 0'
+        else:
+            # Use index if no clear gene column
+            expr_data = self.expression_data.set_index(self.expression_data.columns[0])
+            gene_col = None
+        
+        if gene_col:
+            expr_data = self.expression_data.set_index(gene_col)
+        else:
+            expr_data = self.expression_data
+        
+        # Get control and treatment samples
+        control_models = metadata[metadata['Treatment_Arm'] == 'control']['Model'].tolist()
+        treatment_models = metadata[metadata['Treatment_Arm'] == 'treatment']['Model'].tolist()
+        
+        # Filter for available models in expression data
+        control_models = [m for m in control_models if m in expr_data.columns]
+        treatment_models = [m for m in treatment_models if m in expr_data.columns]
+        
+        print(f"Comparing {len(treatment_models)} treatment vs {len(control_models)} control samples")
+        
+        if len(control_models) < 3 or len(treatment_models) < 3:
+            print("Insufficient samples for differential expression analysis")
+            return
+        
+        # Calculate statistics for each gene
+        fold_changes = []
+        p_values = []
+        gene_names = []
+        
+        for gene in expr_data.index:
+            control_expr = expr_data.loc[gene, control_models].values
+            treatment_expr = expr_data.loc[gene, treatment_models].values
+            
+            # Calculate mean expression
+            control_mean = np.mean(control_expr)
+            treatment_mean = np.mean(treatment_expr)
+            
+            # Calculate fold change (treatment/control)
+            if control_mean > 0:
+                fold_change = treatment_mean / control_mean
+            else:
+                fold_change = treatment_mean / 0.001  # Avoid division by zero
+            
+            log2_fc = np.log2(fold_change) if fold_change > 0 else -10
+            
+            # Statistical test (t-test)
+            try:
+                _, p_val = ttest_ind(treatment_expr, control_expr)
+                p_val = max(p_val, 1e-50)  # Avoid log(0)
+            except:
+                p_val = 1.0
+            
+            fold_changes.append(log2_fc)
+            p_values.append(p_val)
+            gene_names.append(gene)
+        
+        # Create results dataframe
+        volcano_data = pd.DataFrame({
+            'Gene': gene_names,
+            'Log2FoldChange': fold_changes,
+            'PValue': p_values,
+            'MinusLog10PValue': [-np.log10(p) for p in p_values]
+        })
+        
+        # Define significance thresholds
+        fc_threshold = 1.0  # |log2FC| > 1
+        p_threshold = 0.05  # p < 0.05
+        
+        # Classify genes
+        volcano_data['Significant'] = (
+            (np.abs(volcano_data['Log2FoldChange']) > fc_threshold) & 
+            (volcano_data['PValue'] < p_threshold)
+        )
+        volcano_data['Direction'] = np.where(
+            volcano_data['Log2FoldChange'] > fc_threshold, 'Upregulated',
+            np.where(volcano_data['Log2FoldChange'] < -fc_threshold, 'Downregulated', 'Not Significant')
+        )
+        volcano_data.loc[volcano_data['PValue'] >= p_threshold, 'Direction'] = 'Not Significant'
+        
+        # Create volcano plot
+        fig, ax = plt.subplots(figsize=(12, 10))
+        
+        # Color scheme
+        colors = {
+            'Upregulated': '#d62728',     # Red
+            'Downregulated': '#2ca02c',   # Green  
+            'Not Significant': '#7f7f7f'  # Gray
+        }
+        
+        # Plot points by category
+        for direction in ['Not Significant', 'Upregulated', 'Downregulated']:
+            data_subset = volcano_data[volcano_data['Direction'] == direction]
+            ax.scatter(data_subset['Log2FoldChange'], data_subset['MinusLog10PValue'],
+                      c=colors[direction], alpha=0.6, s=30, label=direction)
+        
+        # Add significance thresholds
+        ax.axhline(-np.log10(p_threshold), color='black', linestyle='--', alpha=0.5, 
+                  label=f'p = {p_threshold}')
+        ax.axvline(fc_threshold, color='black', linestyle='--', alpha=0.5)
+        ax.axvline(-fc_threshold, color='black', linestyle='--', alpha=0.5)
+        
+        # Label most significant genes
+        top_genes = volcano_data.nlargest(10, 'MinusLog10PValue')
+        for _, gene_data in top_genes.iterrows():
+            if gene_data['Significant']:
+                ax.annotate(gene_data['Gene'], 
+                           xy=(gene_data['Log2FoldChange'], gene_data['MinusLog10PValue']),
+                           xytext=(5, 5), textcoords='offset points',
+                           fontsize=8, alpha=0.8)
+        
+        # Formatting
+        ax.set_xlabel('Log₂ Fold Change (Treatment/Control)', fontsize=12, fontweight='bold')
+        ax.set_ylabel('-Log₁₀ P-Value', fontsize=12, fontweight='bold')
+        ax.set_title('Volcano Plot: Differential Gene Expression\nTreatment vs Control', 
+                     fontsize=14, fontweight='bold', pad=20)
+        
+        # Add grid
+        ax.grid(True, alpha=0.3)
+        
+        # Legend
+        ax.legend(loc='upper right', frameon=True, fancybox=True, shadow=True)
+        
+        # Statistics summary
+        n_up = len(volcano_data[volcano_data['Direction'] == 'Upregulated'])
+        n_down = len(volcano_data[volcano_data['Direction'] == 'Downregulated']) 
+        n_total = len(volcano_data)
+        
+        stats_text = f"Total genes: {n_total}\n"
+        stats_text += f"Upregulated: {n_up} ({n_up/n_total*100:.1f}%)\n"
+        stats_text += f"Downregulated: {n_down} ({n_down/n_total*100:.1f}%)\n"
+        stats_text += f"Thresholds: |log₂FC| > {fc_threshold}, p < {p_threshold}"
+        
+        ax.text(0.02, 0.98, stats_text, transform=ax.transAxes, 
+               fontsize=10, va='top', ha='left',
+               bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.8))
+        
+        plt.tight_layout()
+        
+        if save_plots:
+            plt.savefig(f'{self.results_dir}/volcano_plot.png', 
+                       dpi=300, bbox_inches='tight')
+            print(f"✓ Volcano plot saved to {self.results_dir}/volcano_plot.png")
+        
+        plt.show()
+        
+        # Print summary
+        print(f"\nDifferential Expression Summary:")
+        print(f"  Upregulated genes: {n_up}")
+        print(f"  Downregulated genes: {n_down}") 
+        print(f"  Not significant: {n_total - n_up - n_down}")
+        print(f"  Total genes analyzed: {n_total}")
+        
+        return volcano_data
+    
     def run_all_workflows(self):
         """
         Run all advanced workflows in sequence
@@ -840,7 +1025,10 @@ class PDXWorkflows:
         print("\n4. Molecular Heatmaps...")
         results['molecular'] = self.molecular_heatmaps()
         
-        print("\n5. Circos Plot...")
+        print("\n5. Volcano Plot...")
+        results['volcano'] = self.volcano_plot()
+        
+        print("\n6. Circos Plot...")
         results['circos'] = self.circos_plot()
         
         print("\n" + "="*60)

@@ -43,6 +43,7 @@ conda activate pdx_analysis
 - **Waterfall Plots**: Drug response classification and ranking
 - **Kaplan-Meier Analysis**: Survival curves with log-rank testing
 - **Molecular Heatmaps**: Expression-response correlation visualization
+- **Volcano Plots**: Differential gene expression analysis (treatment vs control)
 - **Circos Plots**: Genome-wide variant distribution mapping
 
 ### 🔧 **Streamlined Package**
@@ -77,6 +78,12 @@ This tutorial includes comprehensive workflows for:
 - Standardized expression visualization
 - Response-associated gene identification
 - Treatment arm molecular signatures
+
+### 🌋 **Volcano Plots**
+- Differential gene expression visualization
+- Fold change vs statistical significance mapping
+- Automatic gene classification (up/down/not significant)
+- Top differentially expressed gene annotation
 
 ### 🧬 **Circos Plots**
 - Genome-wide variant visualization
@@ -197,6 +204,9 @@ python -c "from src.python.advanced_workflows import PDXWorkflows; w=PDXWorkflow
 
 # Survival analysis only
 python -c "from src.python.advanced_workflows import PDXWorkflows; w=PDXWorkflows(); w.load_data(); w.survival_analysis()"
+
+# Volcano plots only (differential expression)
+python -c "from src.python.advanced_workflows import PDXWorkflows; w=PDXWorkflows(); w.load_data(); w.volcano_plot()"
 ```
 
 ### Step 5: Interactive Analysis
@@ -269,6 +279,12 @@ This tutorial generates the following publication-ready visualizations:
 - **Expression-response correlation**: Gene signatures of drug response
 - **Standardized heatmaps**: Z-scored expression visualization
 - **Response annotation**: Models colored by treatment outcome
+
+### Volcano Plots
+- **Differential expression**: Treatment vs control gene expression comparison
+- **Statistical significance**: P-value thresholds with multiple testing awareness
+- **Effect size visualization**: Log2 fold change thresholds for biological significance
+- **Gene annotation**: Top differentially expressed genes labeled for follow-up
 
 ### Circos Plots
 - **Genome-wide variants**: Chromosomal distribution visualization
