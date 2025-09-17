@@ -18,12 +18,18 @@ log_appender(appender_file("logs/analysis.log"))
 #' @param file_path Path to the tumor volume CSV file
 #' @return Data frame with validated tumor volume data
 load_tumor_data <- function(file_path) {
-  log_info("Loading tumor volume data from: {file_path}")
+  # Remove quotes if they exist (common config parsing issue)
+  clean_path <- gsub('^"(.*)"$', '\\1', file_path)
   
-  if (!file.exists(file_path)) {
-    log_error("Data file not found: {file_path}")
-    stop("Data file not found: ", file_path)
+  log_info("Loading tumor volume data from: {clean_path}")
+  
+  if (!file.exists(clean_path)) {
+    log_error("Data file not found: {clean_path}")
+    stop("Data file not found: ", clean_path)
   }
+  
+  # Use clean_path for reading
+  file_path <- clean_path
   
   tryCatch({
     df <- read.csv(file_path, stringsAsFactors = FALSE)

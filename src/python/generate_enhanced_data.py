@@ -15,11 +15,11 @@ np.random.seed(42)
 class EnhancedPDXDataGenerator:
     """Generate realistic mock PDX data with biological correlations"""
     
-    def __init__(self, n_models=8, n_genes=500, n_timepoints=8):
+    def __init__(self, n_models=20, n_genes=1000, n_timepoints=10):
         self.n_models = n_models
         self.n_genes = n_genes
         self.n_timepoints = n_timepoints
-        self.timepoints = np.arange(0, n_timepoints * 4, 4)  # Every 4 days
+        self.timepoints = np.arange(0, n_timepoints * 3, 3)  # Every 3 days
         
     def generate_model_metadata(self):
         """Generate metadata for PDX models"""
@@ -37,15 +37,8 @@ class EnhancedPDXDataGenerator:
             'Prior_Treatment': np.random.choice(['Naive', 'Pretreated'], self.n_models, p=[0.3, 0.7])
         }
         
-        # Assign treatment arms (stratified by cancer type)
-        treatment_arms = []
-        for cancer in demographics['Cancer_Type']:
-            # Ensure balance within cancer types
-            if len([a for a in treatment_arms if a == 'treatment']) < self.n_models // 2:
-                arm = np.random.choice(['control', 'treatment'], p=[0.5, 0.5])
-            else:
-                arm = 'control'
-            treatment_arms.append(arm)
+        # Assign treatment arms (ensure exactly 10+10)
+        treatment_arms = ['control'] * 10 + ['treatment'] * 10
         
         # Shuffle to avoid systematic bias
         np.random.shuffle(treatment_arms)
@@ -138,10 +131,11 @@ class EnhancedPDXDataGenerator:
         genes = [f'GENE{i+1}' for i in range(self.n_genes)]
         
         # Create gene categories with different expression patterns
+        n_de_genes = 200  # More differentially expressed genes
         oncogenes = genes[:50]  # First 50 genes are oncogenes
         tumor_suppressors = genes[50:100]  # Next 50 are tumor suppressors
         immune_genes = genes[100:150]  # Immune response genes
-        metabolic_genes = genes[150:200]  # Metabolic genes
+        drug_targets = genes[150:200]  # Drug target pathway genes
         housekeeping_genes = genes[200:250]  # Stable housekeeping genes
         random_genes = genes[250:]  # Remaining genes
         
@@ -178,18 +172,25 @@ class EnhancedPDXDataGenerator:
             
             # Treatment effects on specific gene sets
             if treatment == 'treatment':
-                # Treatment downregulates oncogenes
-                gene_effects[oncogene_indices] *= np.random.normal(0.8, 0.1, len(oncogene_indices))
+                # Strong treatment effects for better differential expression
+                # Treatment downregulates oncogenes significantly
+                gene_effects[oncogene_indices] *= np.random.normal(0.4, 0.1, len(oncogene_indices))  # Stronger effect
                 
-                # Treatment upregulates some tumor suppressors
-                gene_effects[ts_indices] *= np.random.normal(1.2, 0.15, len(ts_indices))
+                # Treatment upregulates tumor suppressors
+                gene_effects[ts_indices] *= np.random.normal(1.8, 0.2, len(ts_indices))  # Stronger effect
+                
+                # Drug target pathway strongly affected
+                drug_target_indices = [genes.index(g) for g in drug_targets]
+                gene_effects[drug_target_indices] *= np.random.normal(0.3, 0.15, len(drug_target_indices))
                 
                 # Immune response varies by cancer type
                 immune_indices = [genes.index(g) for g in immune_genes]
                 if cancer_type == 'NSCLC':  # More immunogenic
-                    gene_effects[immune_indices] *= np.random.normal(1.4, 0.2, len(immune_indices))
+                    gene_effects[immune_indices] *= np.random.normal(2.0, 0.3, len(immune_indices))
+                elif cancer_type == 'BRCA':
+                    gene_effects[immune_indices] *= np.random.normal(1.5, 0.2, len(immune_indices))
                 else:
-                    gene_effects[immune_indices] *= np.random.normal(1.1, 0.15, len(immune_indices))
+                    gene_effects[immune_indices] *= np.random.normal(1.2, 0.15, len(immune_indices))
             
             # Housekeeping genes remain stable
             hk_indices = [genes.index(g) for g in housekeeping_genes]
