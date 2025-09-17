@@ -214,7 +214,7 @@ class PDXWorkflows:
                        dpi=300, bbox_inches='tight')
             print(f"✓ Growth curve analysis saved to {self.results_dir}/growth_curves_comprehensive.png")
         
-        plt.show()
+        plt.close()
         
         # Return summary statistics
         return {
@@ -321,7 +321,7 @@ class PDXWorkflows:
                        dpi=300, bbox_inches='tight')
             print(f"✓ Waterfall plot saved to {self.results_dir}/waterfall_plot.png")
         
-        plt.show()
+        plt.close()
         
         # Print summary
         print("\nResponse Summary:")
@@ -462,7 +462,7 @@ class PDXWorkflows:
                        dpi=300, bbox_inches='tight')
             print(f"✓ Survival analysis saved to {self.results_dir}/survival_analysis.png")
         
-        plt.show()
+        plt.close()
         
         return survival_df, summary_df
     
@@ -642,7 +642,7 @@ class PDXWorkflows:
                        dpi=300, bbox_inches='tight')
             print(f"✓ Molecular heatmaps saved to {self.results_dir}/molecular_heatmaps.png")
         
-        plt.show()
+        plt.close()
         
         # Print top correlations
         print("\nTop Gene-Response Correlations:")
@@ -841,7 +841,7 @@ class PDXWorkflows:
                        dpi=300, bbox_inches='tight')
             print(f"✓ Circos plot saved to {self.results_dir}/circos_plot.png")
         
-        plt.show()
+        plt.close()
         
         return variant_data_extended
     
@@ -988,18 +988,18 @@ class PDXWorkflows:
         ax.axvline(fc_threshold, color='black', linestyle='--', alpha=0.5)
         ax.axvline(-fc_threshold, color='black', linestyle='--', alpha=0.5)
         
-        # Label most significant genes (by FDR)
-        top_genes = volcano_data.nlargest(10, 'MinusLog10QValue')
-        for _, gene_data in top_genes.iterrows():
-            if gene_data['Significant']:
-                ax.annotate(gene_data['Gene'], 
-                           xy=(gene_data['Log2FoldChange'], gene_data['MinusLog10QValue']),
-                           xytext=(5, 5), textcoords='offset points',
-                           fontsize=10, alpha=0.8)
+        # Remove gene labels for cleaner appearance
+        # top_genes = volcano_data.nlargest(10, 'MinusLog10QValue')
+        # for _, gene_data in top_genes.iterrows():
+        #     if gene_data['Significant']:
+        #         ax.annotate(gene_data['Gene'], 
+        #                    xy=(gene_data['Log2FoldChange'], gene_data['MinusLog10QValue']),
+        #                    xytext=(5, 5), textcoords='offset points',
+        #                    fontsize=10, alpha=0.8)
         
         # Formatting - Optimized for mobile viewing
         ax.set_xlabel('Log₂ Fold Change (Treatment/Control)', fontsize=16, fontweight='bold')
-        ax.set_ylabel('-Log₁₀ Q-Value (FDR-corrected)', fontsize=16, fontweight='bold')
+        ax.set_ylabel('-Log₁₀ P-Value (FDR-corrected)', fontsize=16, fontweight='bold')
         # Remove title for cleaner mobile appearance
         # ax.set_title('Volcano Plot: Differential Gene Expression\nTreatment vs Control (FDR-corrected)', 
         #              fontsize=14, fontweight='bold', pad=20)
@@ -1038,7 +1038,8 @@ class PDXWorkflows:
                        dpi=300, bbox_inches='tight')
             print(f"✓ Volcano plot saved to {self.results_dir}/volcano_plot.png")
         
-        plt.show()
+        # Close plot to prevent blocking
+        plt.close()
         
         # Print summary
         print(f"\nDifferential Expression Summary (FDR-corrected):")

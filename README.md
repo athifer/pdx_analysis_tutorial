@@ -37,7 +37,7 @@ conda activate pdx_analysis
 
 ### 📊 **Enhanced Dataset**
 - **Doubled Sample Size**: Now 30 models (15+15) for statistical power
-- **Expanded Gene Panel**: 1000 genes with realistic expression patterns
+- **Expanded Gene Panel**: 20,000 genes with realistic expression patterns
 - **Stronger Differential Expression**: Enhanced treatment effects for DE detection
 - **Improved Realism**: Cancer-type specific biology and technical variation
 
@@ -109,8 +109,8 @@ By completing this tutorial, you will learn to:
 ## 🆕 Key Features & Improvements
 
 ### Enhanced Statistical Power
-- **20 PDX Models**: 10 control + 10 treatment for robust comparisons
-- **1000 Genes**: Increased from 500 for better differential expression detection
+- **30 PDX Models**: 15 control + 15 treatment for robust comparisons
+- **20,000 Genes**: Expanded from 500 for comprehensive transcriptomic analysis
 - **Stronger Treatment Effects**: Enhanced signal-to-noise ratio in mock data
 - **Realistic Biology**: Cancer-type specific growth patterns and batch effects
 
@@ -296,6 +296,7 @@ w = PDXWorkflows('data/', 'results/')
 w.expression_data = expression_data
 w.volcano_plot()
 "
+
 ### Step 6: Interactive Analysis
 ```bash
 # Launch Jupyter for interactive analysis
@@ -311,16 +312,6 @@ jupyter notebook notebooks/03_integrated_analysis.ipynb
 | **Survival Analysis** | Extended progression-free survival | Treatment efficacy demonstration |
 | **Molecular Heatmaps** | Expression-response correlations | Biomarker identification |
 
-# You should see (pdx_env) prefix in your terminal prompt
-# If you don't see the prefix, activation failed - check troubleshooting section
-```
-
-**⚠️ Critical**: The virtual environment MUST be activated before running any notebooks or Python scripts. Without activation, you'll get "bad interpreter" errors.
-
-### Alternative Manual Setup
-```bash
-# If enhanced setup fails, use manual setup
-python3 -m venv pdx_env
 ## 📁 Repository Structure
 
 ```
@@ -379,7 +370,7 @@ This tutorial generates the following publication-ready visualizations:
 - **Statistical rigor**: Q-values (FDR) vs raw p-values comparison
 - **Effect size visualization**: Log2 fold change thresholds for biological significance
 - **Publication standards**: Follows genomics best practices for significance testing
-- **Gene annotation**: Top FDR-significant genes labeled for follow-up
+- **Clean mobile layout**: Optimized for mobile viewing with minimal labels
 
 ### Circos Plots
 - **Genome-wide variants**: Chromosomal distribution visualization
