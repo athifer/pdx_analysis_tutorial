@@ -966,8 +966,8 @@ class PDXWorkflows:
         # Use FDR significance instead of raw p-value
         volcano_data.loc[~volcano_data['FDR_Significant'], 'Direction'] = 'Not Significant'
         
-        # Create volcano plot
-        fig, ax = plt.subplots(figsize=(12, 10))
+        # Create volcano plot - Mobile-friendly dimensions
+        fig, ax = plt.subplots(figsize=(10, 10))
         
         # Color scheme
         colors = {
@@ -995,19 +995,23 @@ class PDXWorkflows:
                 ax.annotate(gene_data['Gene'], 
                            xy=(gene_data['Log2FoldChange'], gene_data['MinusLog10QValue']),
                            xytext=(5, 5), textcoords='offset points',
-                           fontsize=8, alpha=0.8)
+                           fontsize=10, alpha=0.8)
         
-        # Formatting
-        ax.set_xlabel('Log₂ Fold Change (Treatment/Control)', fontsize=12, fontweight='bold')
-        ax.set_ylabel('-Log₁₀ Q-Value (FDR-corrected)', fontsize=12, fontweight='bold')
-        ax.set_title('Volcano Plot: Differential Gene Expression\nTreatment vs Control (FDR-corrected)', 
-                     fontsize=14, fontweight='bold', pad=20)
+        # Formatting - Optimized for mobile viewing
+        ax.set_xlabel('Log₂ Fold Change (Treatment/Control)', fontsize=16, fontweight='bold')
+        ax.set_ylabel('-Log₁₀ Q-Value (FDR-corrected)', fontsize=16, fontweight='bold')
+        # Remove title for cleaner mobile appearance
+        # ax.set_title('Volcano Plot: Differential Gene Expression\nTreatment vs Control (FDR-corrected)', 
+        #              fontsize=14, fontweight='bold', pad=20)
+        
+        # Increase tick label font sizes for mobile
+        ax.tick_params(axis='both', which='major', labelsize=14)
         
         # Add grid
         ax.grid(True, alpha=0.3)
         
-        # Legend
-        ax.legend(loc='upper right', frameon=True, fancybox=True, shadow=True)
+        # Legend with larger font
+        ax.legend(loc='upper right', frameon=True, fancybox=True, shadow=True, fontsize=14)
         
         # Statistics summary
         n_up = len(volcano_data[volcano_data['Direction'] == 'Upregulated'])
@@ -1024,7 +1028,7 @@ class PDXWorkflows:
         stats_text += f"Thresholds: |log₂FC| > {fc_threshold}, FDR < {fdr_threshold}"
         
         ax.text(0.02, 0.98, stats_text, transform=ax.transAxes, 
-               fontsize=10, va='top', ha='left',
+               fontsize=12, va='top', ha='left',
                bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.8))
         
         plt.tight_layout()
