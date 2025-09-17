@@ -17,8 +17,11 @@ conda activate pdx_analysis
 pip install lifelines
 # Note: You may see a deprecation warning about 'autograd-gamma' - this is normal and safe to ignore
 
-# 4. Generate effective PDX dataset (15+15 design)
-python src/python/generate_effective_pdx_data.py
+# 4. Generate realistic PDX dataset (15+15 design) - RECOMMENDED
+python src/python/generate_realistic_pdx_data.py
+
+# Alternative: Generate "effective" dataset (stronger drug effects for comparison)
+# python src/python/generate_effective_pdx_data.py
 
 # 5. Run all advanced workflows
 python src/python/advanced_workflows.py
@@ -33,7 +36,7 @@ conda activate pdx_analysis
 ## 🔥 What's New in This Version
 
 ### 📊 **Enhanced Dataset**
-- **Doubled Sample Size**: Now 20 models (10+10) for statistical power
+- **Doubled Sample Size**: Now 30 models (15+15) for statistical power
 - **Expanded Gene Panel**: 1000 genes with realistic expression patterns
 - **Stronger Differential Expression**: Enhanced treatment effects for DE detection
 - **Improved Realism**: Cancer-type specific biology and technical variation
@@ -177,31 +180,34 @@ python -c "import lifelines; print('✓ Survival analysis ready')" || pip instal
 
 ### Step 3: Generate Realistic PDX Dataset (30 models)
 ```bash
-# Generate effective PDX study (15+15 samples)
-python src/python/generate_effective_pdx_data.py
+# Generate realistic PDX study (15+15 samples) - RECOMMENDED
+python src/python/generate_realistic_pdx_data.py
+
+# Alternative: Generate "effective" study for comparison
+# python src/python/generate_effective_pdx_data.py
 ```
 
 ### Step 4: Run Analysis Workflows
 
 #### Complete Analysis Suite
 ```bash
-# Run all workflows with effective study data
+# Run all workflows with realistic study data
 python -c "
 from src.python.advanced_workflows import PDXWorkflows
 import pandas as pd
 
-# Load effective study data (15+15 samples)
+# Load realistic study data (15+15 samples)
 w = PDXWorkflows('data/', 'results/')
-w.expression_data = pd.read_csv('data/expression_tpm_effective.csv')
-w.tumor_data = pd.read_csv('data/tumor_volumes_effective.csv') 
-w.variant_data = pd.read_csv('data/variants_effective.csv')
+w.expression_data = pd.read_csv('data/expression_tpm_realistic.csv')
+w.tumor_data = pd.read_csv('data/tumor_volumes_realistic.csv') 
+w.variant_data = pd.read_csv('data/variants_realistic.csv')
 
 # Run all analyses
 w.growth_curves_analysis()
 w.waterfall_plot() 
 w.survival_analysis()
 w.molecular_heatmaps()
-w.volcano_plot()  # Expected: ~924 FDR-significant genes (4.6%)
+w.volcano_plot()  # Expected: ~214 FDR-significant genes (1.1% - realistic)
 w.circos_plot()
 
 print('\\nAnalysis complete! Check results/ directory')
@@ -281,7 +287,7 @@ w.tumor_data = tumor_data
 w.survival_analysis()
 "
 
-# Volcano plots only (will show ~924 FDR genes - realistic for effective studies)
+# Volcano plots only (will show ~214 FDR genes - realistic for moderate drug effects)
 python -c "
 from src.python.advanced_workflows import PDXWorkflows
 import pandas as pd
@@ -300,7 +306,7 @@ jupyter notebook notebooks/03_integrated_analysis.ipynb
 
 | Analysis Type | Expected Outcome | Interpretation |
 |---------------|------------------|----------------|
-| **Volcano Plot** | ~924 FDR genes (4.6%) | Realistic for well-powered studies |
+| **Volcano Plot** | ~214 FDR genes (1.1%) | Realistic for moderate drug effects |
 | **Growth Curves** | Significant treatment effect | Clear tumor growth inhibition |
 | **Survival Analysis** | Extended progression-free survival | Treatment efficacy demonstration |
 | **Molecular Heatmaps** | Expression-response correlations | Biomarker identification |
@@ -326,9 +332,9 @@ pdx_analysis_tutorial/
 │   └── metadata_effective.csv          # Treatment assignments and sample info
 ├── 📁 src/                     # Analysis source code
 │   ├── python/
-│   │   ├── advanced_workflows.py           # 🆕 Complete visualization suite with FDR correction
-│   │   ├── generate_effective_pdx_data.py  # Realistic PDX study data generation
-│   │   └── advanced_workflows.py           # Complete analysis pipeline
+│   │   ├── advanced_workflows.py           # Complete analysis pipeline with volcano plots
+│   │   ├── generate_realistic_pdx_data.py  # Realistic PDX data (moderate effects)
+│   │   └── generate_effective_pdx_data.py  # Effective PDX data (strong effects)
 │   └── R/
 │       └── analyze_volume.R                 # R-based growth analysis
 ├── 📁 notebooks/               # Jupyter notebooks for interactive analysis
@@ -382,19 +388,28 @@ This tutorial generates the following publication-ready visualizations:
 
 ## 🔬 Data Details
 
-### Realistic PDX Study Dataset (30 Models)
+### Two Dataset Options for Different Learning Goals
+
+#### 🎯 **Realistic Dataset** (RECOMMENDED - `generate_realistic_pdx_data.py`)
 - **Study design**: 15 control + 15 treatment models (well-powered study)
 - **Gene expression**: 20,000 genes (realistic RNA-seq scale)
-- **Statistical power**: 80%+ for moderate effects (publication-ready)
-- **Expected FDR genes**: ~924 (4.6% - matches real effective PDX studies)
-- **Effect sizes**: 1.5-3x fold changes (realistic for targeted therapy)
-- **Time points**: 5 measurements per model (0, 7, 14, 21, 28 days)
-- **Variants**: 750 variants across cancer genes (realistic burden)
+- **Expected FDR genes**: ~214 (1.1% - typical for moderate drug effects)
+- **Effect sizes**: 1.1-2x fold changes (realistic for most therapies)
+- **Tumor volume effect**: ~30% growth inhibition (clinically realistic)
+- **Mixed responders**: Some models respond well, others poorly (real-world variation)
+- **Use case**: Learning real-world analysis challenges and setting realistic expectations
+
+#### 🚀 **Effective Dataset** (for comparison - `generate_effective_pdx_data.py`)
+- **Study design**: 15 control + 15 treatment models (same power)
+- **Expected FDR genes**: ~924 (4.6% - strong drug effects)
+- **Effect sizes**: 1.5-3x fold changes (effective targeted therapy)
+- **Tumor volume effect**: ~56% growth inhibition (dramatic response)
+- **Consistent responders**: Most models show clear treatment benefit
+- **Use case**: Demonstrating ideal study outcomes and method validation
 
 ### Enhanced Study Features
 - **Lower technical noise**: Improved experimental protocols
 - **Larger sample size**: Adequate statistical power for discovery
-- **Realistic effect distribution**: Based on published PDX studies
 - **Gene categorization**: Oncogenes, tumor suppressors, immune genes, drug targets
 - **Biological realism**: Cancer-type specific patterns and correlations
 - **Publication-ready**: Meets standards for high-impact journals
@@ -476,7 +491,7 @@ import pandas as pd
 w = PDXWorkflows('data/', 'results/')
 w.expression_data = pd.read_csv('data/expression_tpm_effective.csv')
 w.tumor_data = pd.read_csv('data/tumor_volumes_effective.csv')
-w.volcano_plot()  # Expected: ~924 FDR genes (4.6%)
+w.volcano_plot()  # Expected: ~214 FDR genes (1.1% - realistic)
 "
 
 # 3. Check results
@@ -484,7 +499,7 @@ ls results/volcano_plot.png  # Publication-ready volcano plot
 ```
 
 ### Expected Results
-- **FDR-significant genes**: ~924 (4.6%)
+- **FDR-significant genes**: ~214 (1.1% - realistic for moderate effects)
 - **Effect sizes**: 1.5-3x fold changes
 - **Statistical power**: Publication-ready discovery rate
 

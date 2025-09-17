@@ -18,20 +18,23 @@
 
 ### Generate Data
 ```bash
-# Generate realistic PDX study data (15+15 samples)
-python src/python/generate_effective_pdx_data.py
+# Generate realistic PDX study data (15+15 samples) - RECOMMENDED
+python src/python/generate_realistic_pdx_data.py
+
+# Alternative: Generate "effective" study for comparison  
+# python src/python/generate_effective_pdx_data.py
 ```
 
 ### Run Analysis
 ```bash
-# Complete analysis suite
+# Complete analysis suite with realistic data
 python -c "
 from src.python.advanced_workflows import PDXWorkflows
 import pandas as pd
 w = PDXWorkflows('data/', 'results/')
-w.expression_data = pd.read_csv('data/expression_tpm_effective.csv')
-w.tumor_data = pd.read_csv('data/tumor_volumes_effective.csv')
-w.variant_data = pd.read_csv('data/variants_effective.csv')
+w.expression_data = pd.read_csv('data/expression_tpm_realistic.csv')
+w.tumor_data = pd.read_csv('data/tumor_volumes_realistic.csv')
+w.variant_data = pd.read_csv('data/variants_realistic.csv')
 w.volcano_plot()
 w.growth_curves_analysis()
 w.molecular_heatmaps()
