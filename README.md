@@ -9,16 +9,19 @@ A streamlined tutorial for analyzing Patient-Derived Xenograft (PDX) data with P
 git clone https://github.com/athifer/pdx_analysis_tutorial.git
 cd pdx_analysis_tutorial
 
-# 2. Create environment with all packages (~10-15 minutes)
-conda create -n pdx_analysis python=3.9 pandas numpy matplotlib seaborn scipy scikit-learn jupyter lifelines -y
+# 2. Create environment with core packages (~5-10 minutes)
+conda create -n pdx_analysis python=3.9 pandas numpy matplotlib seaborn scipy scikit-learn jupyter -y
 
-# 3. IMPORTANT: Activate the environment before running scripts!
+# 3. IMPORTANT: Activate the environment before installing additional packages!
 conda activate pdx_analysis
 
-# 4. Generate mock PDX data (~3-5 minutes)
+# 4. Install lifelines for survival analysis (~2-3 minutes)
+pip install lifelines
+
+# 5. Generate mock PDX data (~3-5 minutes)
 python src/python/generate_realistic_pdx_data.py
 
-# 5. Run all analysis workflows (~5-10 minutes)
+# 6. Run all analysis workflows (~5-10 minutes)
 python src/python/advanced_workflows.py
 ```
 
@@ -90,6 +93,14 @@ By completing this tutorial, you will:
 **Dependencies**: Python 3.9+, conda (recommended)
 
 ## 🛠️ Common Issues
+
+### "PackagesNotFoundError: lifelines not available"
+**Solution**: Install lifelines with pip after creating the conda environment:
+```bash
+conda create -n pdx_analysis python=3.9 pandas numpy matplotlib seaborn scipy scikit-learn jupyter -y
+conda activate pdx_analysis
+pip install lifelines  # Use pip for this package
+```
 
 ### "ModuleNotFoundError: No module named 'pandas'"
 **Solution**: You forgot to activate the conda environment!
