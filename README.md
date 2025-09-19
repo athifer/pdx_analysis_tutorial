@@ -1,6 +1,6 @@
 # PDX Analysis Tutorial
 
-A streamlined tutorial for analyzing Patient-Derived Xenograft (PDX) data with Python. Generate publication-quality visualizations including growth curves, survival analysis, volcano plots, and molecular heatmaps.
+A streamlined tutorial for analyzing Patient-Derived Xenograft (PDX) data with Python. Generate publication-quality visualizations including growth curves, volcano plots, and molecular heatmaps.
 
 ## 🚀 Quick Start (~20-30 minutes)
 
@@ -12,22 +12,28 @@ cd pdx_analysis_tutorial
 # 2. Create environment with core packages (~5-10 minutes)
 conda create -n pdx_analysis python=3.9 pandas numpy matplotlib seaborn scipy scikit-learn jupyter -y
 
-# 3. IMPORTANT: Activate the environment before installing additional packages!
+# 3. IMPORTANT: Activate the environment!
 conda activate pdx_analysis
 
-# 4. Install lifelines for survival analysis (~2-3 minutes)
-pip install lifelines
-
-# 5. Generate mock PDX data (~3-5 minutes)
+# 4. Generate mock PDX data (~3-5 minutes)
 python src/python/generate_realistic_pdx_data.py
 
-# 6. Run all analysis workflows (~5-10 minutes)
+# 5. Run all analysis workflows (~5-10 minutes)
 python src/python/advanced_workflows.py
 ```
 
 That's it! Your `results/` folder now contains publication-ready plots.
 
 > **Note**: The conda environment creation (step 2) takes the longest time as it downloads and installs all packages. Subsequent runs are much faster since the environment is already set up.
+
+## 📊 What You Get
+
+**5 Publication-Ready Visualizations:**
+- **Growth Curves**: Treatment vs control with statistics
+- **Waterfall Plot**: Drug response classification  
+- **Molecular Heatmap**: Expression vs response correlation
+- **Volcano Plot**: Differential gene expression (FDR corrected)
+- **Circos Plot**: Genome-wide variant visualization
 
 ## � What You Get
 
@@ -48,8 +54,7 @@ That's it! Your `results/` folder now contains publication-ready plots.
 
 ## 🔬 Analysis Methods
 
-- **Statistical Testing**: Mann-Whitney U, log-rank test, FDR correction
-- **Survival Analysis**: Time-to-progression with censoring
+- **Statistical Testing**: Mann-Whitney U, FDR correction
 - **Gene Expression**: Differential expression with fold change
 - **Response Classification**: RECIST-like criteria (Responder/Stable/Progressor)
 - **Growth Modeling**: Exponential and linear growth analysis
@@ -78,7 +83,6 @@ Then run: `python src/python/advanced_workflows.py`
 By completing this tutorial, you will:
 - Generate publication-quality PDX visualizations
 - Apply statistical methods for preclinical data
-- Perform survival analysis on tumor progression
 - Create volcano plots with proper FDR correction
 - Integrate multi-omics data for biomarker discovery
 
@@ -89,18 +93,10 @@ By completing this tutorial, you will:
 - **Subsequent runs**: ~5-10 minutes (data generation + analysis only)
 - **Individual plots**: ~1-2 minutes each
 
-**Output**: 6 publication-ready figures in `results/`
+**Output**: 5 publication-ready figures in `results/`
 **Dependencies**: Python 3.9+, conda (recommended)
 
 ## 🛠️ Common Issues
-
-### "PackagesNotFoundError: lifelines not available"
-**Solution**: Install lifelines with pip after creating the conda environment:
-```bash
-conda create -n pdx_analysis python=3.9 pandas numpy matplotlib seaborn scipy scikit-learn jupyter -y
-conda activate pdx_analysis
-pip install lifelines  # Use pip for this package
-```
 
 ### "ModuleNotFoundError: No module named 'pandas'"
 **Solution**: You forgot to activate the conda environment!
@@ -114,6 +110,8 @@ python src/python/generate_realistic_pdx_data.py  # Now this will work
 ```bash
 conda init bash  # or 'zsh' for Mac default shell
 source ~/.bashrc  # or restart terminal
+conda activate pdx_analysis
+```
 conda activate pdx_analysis
 ```
 

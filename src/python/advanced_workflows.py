@@ -1077,39 +1077,37 @@ class PDXWorkflows:
         
         # Run all analyses with progress tracking
         print("\n📊 Starting comprehensive PDX analysis...")
-        print("    This will generate 6 publication-ready visualizations\n")
+        print("    This will generate 5 publication-ready visualizations\n")
         
-        print("1/6 Growth Curve Analysis...")
+        print("1/5 Growth Curve Analysis...")
         print("    - Individual tumor trajectories")
         print("    - Treatment vs control comparisons") 
         results['growth'] = self.growth_curves_analysis()
         print("    ✓ Growth curves completed\n")
         
-        print("2/6 Waterfall Plot Analysis...")
+        print("2/5 Waterfall Plot Analysis...")
         print("    - Drug response classification")
         print("    - Responder/Stable/Progressor categories")
         results['waterfall'] = self.waterfall_plot()
         print("    ✓ Waterfall plot completed\n")
         
-        print("3/6 Survival Analysis...")
-        print("    - Kaplan-Meier curves")
-        print("    - Log-rank statistical testing")
-        results['survival'] = self.survival_analysis()
-        print("    ✓ Survival analysis completed\n")
+        # Skip survival analysis - results not informative enough
+        # print("3/5 Survival Analysis...")
+        # results['survival'] = self.survival_analysis()
         
-        print("4/6 Molecular Heatmaps...")
+        print("3/5 Molecular Heatmaps...")
         print("    - Gene expression patterns")
         print("    - Expression-response correlations")
         results['molecular'] = self.molecular_heatmaps()
         print("    ✓ Molecular heatmaps completed\n")
         
-        print("5/6 Volcano Plot...")
+        print("4/5 Volcano Plot...")
         print("    - Differential gene expression")
         print("    - FDR multiple testing correction")
         results['volcano'] = self.volcano_plot()
         print("    ✓ Volcano plot completed\n")
         
-        print("6/6 Circos Plot...")
+        print("5/5 Circos Plot...")
         print("    - Genome-wide variant visualization")
         print("    - Chromosomal distribution mapping")
         results['circos'] = self.circos_plot()
@@ -1122,7 +1120,6 @@ class PDXWorkflows:
         print("\n📊 Generated files:")
         print("   • growth_curves_comprehensive.png - Growth analysis")
         print("   • waterfall_plot.png - Response classification") 
-        print("   • survival_analysis.png - Kaplan-Meier curves")
         print("   • molecular_heatmaps.png - Expression patterns")
         print("   • volcano_plot.png - Differential expression")
         print("   • circos_plot.png - Genomic variant distribution")
