@@ -20,6 +20,9 @@ python src/python/generate_realistic_pdx_data.py
 
 # 5. Run all analysis workflows (~5-10 minutes)
 python src/python/advanced_workflows.py
+
+# 6. Optional: Explore with interactive notebooks
+jupyter notebook notebooks/
 ```
 
 That's it! Your `results/` folder now contains publication-ready plots.
@@ -63,18 +66,38 @@ That's it! Your `results/` folder now contains publication-ready plots.
 
 ```
 data/                    # Mock PDX datasets
-scripts/                 # Core analysis scripts  
+src/python/              # Core analysis scripts  
 ├── generate_realistic_pdx_data.py  # Data generation
 └── advanced_workflows.py           # Main analysis pipeline
+notebooks/               # Interactive Jupyter notebooks
+├── 01_data_exploration.ipynb       # Data loading and QC
+├── 02_biomarker_analysis.ipynb     # Biomarker discovery
+└── 03_integrated_analysis.ipynb    # Multi-omics integration
 results/                 # Generated plots and outputs
 ```
+
+## 📓 Interactive Notebooks
+
+For step-by-step learning and customization, use the Jupyter notebooks:
+
+```bash
+# After setting up environment and generating data:
+jupyter notebook notebooks/01_data_exploration.ipynb
+```
+
+**Available notebooks:**
+- **01_data_exploration.ipynb** - Data loading, quality control, and initial exploration
+- **02_biomarker_analysis.ipynb** - Differential expression and biomarker discovery  
+- **03_integrated_analysis.ipynb** - Multi-omics integration and predictive modeling
+
+These notebooks provide interactive analysis with detailed explanations, perfect for learning and adapting to your own data.
 
 ## 🛠️ Customization
 
 Want to analyze your own data? Replace the CSV files in `data/` with your datasets:
-- `tumor_volumes_mock.csv` - Tumor volume measurements
-- `expression_tpm_mock.csv` - Gene expression (TPM values)  
-- `variants_mock.csv` - Genomic variants
+- `tumor_volumes_realistic.csv` - Tumor volume measurements
+- `expression_tpm_realistic.csv` - Gene expression (TPM values)  
+- `variants_realistic.csv` - Genomic variants
 
 Then run: `python src/python/advanced_workflows.py`
 
