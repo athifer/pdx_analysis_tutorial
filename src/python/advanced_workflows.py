@@ -61,6 +61,9 @@ class PDXWorkflows:
         self.expression_data = None
         self.variant_data = None
         
+        # Ensure results directory exists
+        os.makedirs(self.results_dir, exist_ok=True)
+        
     def load_data(self):
         """Load all PDX data files"""
         try:
