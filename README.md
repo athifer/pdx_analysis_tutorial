@@ -11,12 +11,14 @@ cd pdx_analysis_tutorial
 
 # 2. Create environment with all packages (~10-15 minutes)
 conda create -n pdx_analysis python=3.9 pandas numpy matplotlib seaborn scipy scikit-learn jupyter lifelines -y
+
+# 3. IMPORTANT: Activate the environment before running scripts!
 conda activate pdx_analysis
 
-# 3. Generate mock PDX data (~3-5 minutes)
+# 4. Generate mock PDX data (~3-5 minutes)
 python src/python/generate_realistic_pdx_data.py
 
-# 4. Run all analysis workflows (~5-10 minutes)
+# 5. Run all analysis workflows (~5-10 minutes)
 python src/python/advanced_workflows.py
 ```
 
@@ -86,4 +88,21 @@ By completing this tutorial, you will:
 
 **Output**: 6 publication-ready figures in `results/`
 **Dependencies**: Python 3.9+, conda (recommended)
+
+## 🛠️ Common Issues
+
+### "ModuleNotFoundError: No module named 'pandas'"
+**Solution**: You forgot to activate the conda environment!
+```bash
+conda activate pdx_analysis  # Run this first!
+python src/python/generate_realistic_pdx_data.py  # Now this will work
+```
+
+### Environment activation not working?
+**Solution**: Initialize conda for your shell (one-time setup):
+```bash
+conda init bash  # or 'zsh' for Mac default shell
+source ~/.bashrc  # or restart terminal
+conda activate pdx_analysis
+```
 
