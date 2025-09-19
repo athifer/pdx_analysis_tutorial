@@ -2,25 +2,27 @@
 
 A streamlined tutorial for analyzing Patient-Derived Xenograft (PDX) data with Python. Generate publication-quality visualizations including growth curves, survival analysis, volcano plots, and molecular heatmaps.
 
-## 🚀 Quick Start (5 minutes)
+## 🚀 Quick Start (~20-30 minutes)
 
 ```bash
-# 1. Clone and setup
+# 1. Clone and setup (~2 minutes)
 git clone https://github.com/athifer/pdx_analysis_tutorial.git
 cd pdx_analysis_tutorial
 
-# 2. Create environment with all packages
+# 2. Create environment with all packages (~10-15 minutes)
 conda create -n pdx_analysis python=3.9 pandas numpy matplotlib seaborn scipy scikit-learn jupyter lifelines -y
 conda activate pdx_analysis
 
-# 3. Generate mock PDX data (30 samples: 15 control + 15 treatment)
+# 3. Generate mock PDX data (~3-5 minutes)
 python src/python/generate_realistic_pdx_data.py
 
-# 4. Run all analysis workflows
+# 4. Run all analysis workflows (~5-10 minutes)
 python src/python/advanced_workflows.py
 ```
 
 That's it! Your `results/` folder now contains publication-ready plots.
+
+> **Note**: The conda environment creation (step 2) takes the longest time as it downloads and installs all packages. Subsequent runs are much faster since the environment is already set up.
 
 ## � What You Get
 
@@ -77,7 +79,11 @@ By completing this tutorial, you will:
 
 ---
 
-**Time Required**: ~10 minutes setup + analysis
+**Time Required**: 
+- **First-time setup**: ~20-30 minutes (conda environment creation is the longest step)
+- **Subsequent runs**: ~5-10 minutes (data generation + analysis only)
+- **Individual plots**: ~1-2 minutes each
+
 **Output**: 6 publication-ready figures in `results/`
 **Dependencies**: Python 3.9+, conda (recommended)
 
